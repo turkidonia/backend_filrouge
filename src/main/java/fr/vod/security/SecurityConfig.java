@@ -1,5 +1,6 @@
 package fr.vod.security;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,15 +24,27 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.csrf(csrf -> csrf.disable())
-
+		http
+				.csrf(csrf -> csrf.disable()) // Disable CSRF for JWT stateless
+				.sessionManagement(session ->
+						session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // No session
 				.authorizeHttpRequests(authz -> authz
-						.requestMatchers("/api/**").authenticated()//on peut le changer en permitAll() mais plus securisé avec authotoken
-						.requestMatchers("/public/**").permitAll()
-						.requestMatchers("/public/*.mp4").permitAll()
-						)
-				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+						.requestMatchers("/public/**", "/public/*.mp4").permitAll()
+						.requestMatchers("/admin/**").hasRole("ADMIN")
+						.requestMatchers("/mentor/**").hasRole("MENTOR")
+						.requestMatchers("/mentoree/**").hasRole("MENTOREE")
+						.requestMatchers("/api/**").authenticated()
+						.anyRequest().authenticated()
+				)
+				.exceptionHandling(ex ->
+						ex.authenticationEntryPoint((request, response, authException) -> {
+							// Return 401 for unauthorized requests
+							response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+						})
+				)
+				// Add your JWT token filter before UsernamePasswordAuthenticationFilter
 				.addFilterBefore(tokenAuthFilter, UsernamePasswordAuthenticationFilter.class);
+
 		System.out.println("Je securise les accès");
 		return http.build();
 	}
@@ -45,5 +58,4 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
 }

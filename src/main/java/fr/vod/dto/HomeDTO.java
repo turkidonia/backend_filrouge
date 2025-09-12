@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 public class HomeDTO {
 	
-	List<CategoryDTO> categoryListDTO;
+	List<ServiceDTO> categoryListDTO;
 	List<VideoDTO> videoListDTO;
 
 }

@@ -1,9 +1,16 @@
 package fr.vod.security;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import fr.vod.service.CustomUserDetailsService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -21,36 +28,52 @@ import jakarta.servlet.http.HttpServletResponse;
 @Component
 public class TokenAuthentificationFilter extends OncePerRequestFilter {
 
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        /*final String authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        	System.out.println("Pas de bearer");
-            filterChain.doFilter(request, response);
-            return;
-        }
-        String token = authHeader.substring(7);*/
-    	String token = request.getParameter("token");
+
+        String token = extractToken(request);
+
         if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            if (token.equals("azertyuiop")) {
-            	UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-            	        "username_a_definir",
-            	        "password_encode_de_pref",
-            	        getAuthorities());
-            	
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            try {
+                String email = getEmailFromToken(token);
+                if (email != null) {
+                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails, null, userDetails.getAuthorities());
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception e) {
+                logger.warn("Invalid JWT token: " + e.getMessage());
             }
         }
+
         filterChain.doFilter(request, response);
     }
-    
-    private Collection<? extends GrantedAuthority> getAuthorities() {
-    	ArrayList<GrantedAuthority> liste = new ArrayList<GrantedAuthority>();
-    	liste.add(new SimpleGrantedAuthority("ADMIN"));
-        return liste;
+
+    private String extractToken(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return authHeader.substring(7);
+        }
+        return request.getParameter("token");
+    }
+
+    private String getEmailFromToken(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8)))
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
     }
 }

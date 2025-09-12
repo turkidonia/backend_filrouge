@@ -1,79 +1,99 @@
 package fr.vod.controller;
 
+import fr.vod.dto.*;
+import fr.vod.security.JwtTokenUtil;
+import fr.vod.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import fr.vod.dto.AuthenticationForm;
-import fr.vod.dto.AuthenticationResponse;
-import fr.vod.dto.SubscribeForm;
-import fr.vod.dto.RestAPIResponse;
 import fr.vod.exception.UtilisateurExisteDejaException;
-import fr.vod.exception.UtilisateurInexistantException;
-import fr.vod.model.User;
 import fr.vod.service.UserService;
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+
 
 @RestController
 @RequestMapping("public/v1/auth")
 @CrossOrigin
 public class AuthController {
-	
-	@Autowired
-	UserService userService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil; // Your JWT utility class for generating tokens
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private CustomUserDetailsService userDetailsService;
 
     @PostMapping("/login")
-    public Object login(@RequestBody AuthenticationForm loginRequest, 
-    		HttpServletResponse response) {
-        Authentication authenticationRequest =
-            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword());
+    public ResponseEntity<?> login(@RequestBody AuthenticationForm loginRequest) {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            loginRequest.getUsername(),
+                            loginRequest.getPassword()
+                    )
+            );
 
-        System.out.println(loginRequest.getUsername()+" / "+loginRequest.getPassword());
-        User user = userService.get(loginRequest.getUsername(), loginRequest.getPassword());
-        //verifier que l'utilisateur en base de donnees
-        if (user!=null) {
-        	String token = user.hashCode()+""+System.currentTimeMillis();
-        
-        //String token = "azertyuiop";
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-        //ajouter un cookie à la reponse
-        Cookie cookie = new Cookie("auth-token-vod", token);
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        response.addCookie(cookie);
-        
-        // Retourner directement le token sans redirection
-       return ResponseEntity.ok(new AuthenticationResponse(token));
+            String token = jwtTokenUtil.generateToken(userDetails);
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(new JwtResponse(token, userDetails.getUsername(), roles));
+
+        } catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
-        // Pour test de l'erreur
-        else throw new UtilisateurInexistantException("Pas d'utilisateur avec cet email en base");
     }
-    
+
     @PostMapping("/subscribe")
-    public Object subscribe(@RequestBody SubscribeForm subscribeForm, HttpServletResponse response) {
-         if(!userService.exists(subscribeForm.getEmail()))
-         {
-             userService.createUser(
-              subscribeForm.getEmail(), 
-              subscribeForm.getPassword(),
-              subscribeForm.getLastName(), 
-              subscribeForm.getFirstName(),
-              subscribeForm.getGender(),	
-              subscribeForm.getPhone());
-        return ResponseEntity.ok(new RestAPIResponse(200, "Enregistrement créé avec succès"));
-         }
-        else throw new UtilisateurExisteDejaException();
-       
-         }
-    
-    
-    
-    
+    public ResponseEntity<?> subscribe(@RequestBody SubscribeForm subscribeForm) {
+        if (userService.exists(subscribeForm.getEmail())) {
+            throw new UtilisateurExisteDejaException();
+        }
+
+        userService.createUser(
+                subscribeForm.getEmail(),
+                subscribeForm.getPassword(),
+                subscribeForm.getUsername(),
+                subscribeForm.getLastName(),
+                subscribeForm.getFirstName(),
+                subscribeForm.getGender(),
+                subscribeForm.getPhone()
+        );
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(subscribeForm.getEmail());
+
+        String token = jwtTokenUtil.generateToken(userDetails);
+
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        JwtResponse jwtResponse = new JwtResponse(token, userDetails.getUsername(), roles);
+        return ResponseEntity.ok(jwtResponse);
+    }
+
 }

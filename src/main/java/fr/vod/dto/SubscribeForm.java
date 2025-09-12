@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class SubscribeForm {
 	private String email;
+	private String username;
 	private String password;
 	private String lastName;
 	private String firstName;

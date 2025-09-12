@@ -1,36 +1,54 @@
 package fr.vod.service;
 
+import fr.vod.model.Utilisateur;
+import fr.vod.repository.UtilisateurRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import fr.vod.model.User;
-import fr.vod.repository.UserRepository;
+import java.util.Optional;
 
 @Service
 public class UserService {
 
 	@Autowired
-	UserRepository userRepository;
-	
-	public User get(String username, String password) {
-		return userRepository.findByEmailAndPassword(username, password);
+	private UtilisateurRepository userRepository;
+
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
+	/**
+	 * Authenticate user by username and raw password
+	 */
+	public Utilisateur get(String username, String rawPassword) {
+		Optional<Utilisateur> user = userRepository.findByEmail(username);
+		if (user.isPresent() && passwordEncoder.matches(rawPassword, user.get().getPassword())) {
+			return user.get();
+		}
+		return null;
 	}
-	
-	public User createUser(String email, String password, String lastName, String firstName, Character gender, String phone) {
-		System.out.println(lastName+" - "+email);
-		User user = new User();
+
+	/**
+	 * Create new user with hashed password
+	 */
+	public Utilisateur createUser(String email, String password, String username, String lastName, String firstName, Character gender, String phone) {
+		Utilisateur user = new Utilisateur();
 		user.setEmail(email);
-		user.setPassword(password);
-		user.setFirstName(firstName);
-		user.setLastName(lastName);
+		user.setPassword(passwordEncoder.encode(password)); // hash the password
+		user.setName(firstName);
+		user.setSurname(lastName);
 		user.setGender(gender);
 		user.setPhone(phone);
-		userRepository.save(user);
-		return user;
-		
+		user.setUsername(username);
+		user.setMentored(true);
+		System.out.println("Creating user: " + email + " - " + lastName);
+		return userRepository.save(user);
 	}
-	
+
+	/**
+	 * Check if user with given email exists
+	 */
 	public boolean exists(String email) {
-		return (userRepository.findByEmail(email)!=null);
+		return userRepository.findByEmail(email).isPresent();
 	}
 }
