@@ -13,4 +13,5 @@ public class SubscribeForm {
 	private String firstName;
 	private Character gender;
 	private String phone;
+	private Boolean isMentored;  // <--- ajouté pour mapper le front
 }

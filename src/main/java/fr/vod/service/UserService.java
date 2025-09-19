@@ -31,7 +31,7 @@ public class UserService {
 	/**
 	 * Create new user with hashed password
 	 */
-	public Utilisateur createUser(String email, String password, String username, String lastName, String firstName, Character gender, String phone) {
+	public Utilisateur createUser(String email, String password, String username, String lastName, String firstName, Character gender, String phone, Boolean isMentored) {
 		Utilisateur user = new Utilisateur();
 		user.setEmail(email);
 		user.setPassword(passwordEncoder.encode(password)); // hash the password
@@ -40,7 +40,8 @@ public class UserService {
 		user.setGender(gender);
 		user.setPhone(phone);
 		user.setUsername(username);
-		user.setMentored(true);
+		user.setMentored(isMentored); // <--- prend la valeur du front
+	    user.setAdmin(false);          // par défaut
 		System.out.println("Creating user: " + email + " - " + lastName);
 		return userRepository.save(user);
 	}

@@ -81,7 +81,8 @@ public class AuthController {
                 subscribeForm.getLastName(),
                 subscribeForm.getFirstName(),
                 subscribeForm.getGender(),
-                subscribeForm.getPhone()
+                subscribeForm.getPhone(),
+                subscribeForm.getIsMentored()
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(subscribeForm.getEmail());
