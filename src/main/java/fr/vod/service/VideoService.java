@@ -21,6 +21,9 @@ public class VideoService {
 	public List<Video> getAllVideos() {
 		return videoRepo.findAll();
 	}
+	public List<Video> getAllVideosByService(String service) {
+		return videoRepo.findByService_NameIgnoreCase(service);
+	}
 
 	public Video createVideo(VideoDTO dto) {
 		Video video = new Video();

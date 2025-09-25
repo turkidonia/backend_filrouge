@@ -17,14 +17,17 @@ public class VideoController {
     private VideoService videoService;
 
     @PreAuthorize("hasAnyRole('ADMIN', 'MENTOR')")
-    @PostMapping("Create")
+    @PostMapping
     public ResponseEntity<Video> createVideo(@RequestBody VideoDTO videoDTO) {
         return ResponseEntity.ok(videoService.createVideo(videoDTO));
     }
 
-    @PreAuthorize("hasAnyRole('ADMIN', 'MENTOR', 'MENTOREE')")
-    @GetMapping("")
-    public ResponseEntity<List<Video>> getAllVideos() {
-        return ResponseEntity.ok(videoService.getAllVideos());
+    @GetMapping
+    public ResponseEntity<List<Video>> getAllVideos(@RequestParam(required = false) String service) {
+    	if (service != null){ 
+    		return ResponseEntity.ok(videoService.getAllVideosByService(service));
+    	} else {
+    		return ResponseEntity.ok(videoService.getAllVideos());
+    	}
     }
 }
