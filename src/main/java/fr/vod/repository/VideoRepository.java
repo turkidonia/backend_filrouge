@@ -9,6 +9,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface VideoRepository extends JpaRepository<Video, Long> {
-	List<Video> findByService_NameIgnoreCase(String service);
+	List<Video> findByService_NameIgnoreCaseAndIsActiveTrue(String service);
 }
 

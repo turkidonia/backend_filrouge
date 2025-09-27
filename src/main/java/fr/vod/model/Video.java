@@ -23,6 +23,7 @@ public class Video {
     private int duration;
     private String author;
     private String publisher;
+    private Boolean isActive = true;
 
     @ManyToOne
     private Service service;
@@ -35,4 +36,9 @@ public class Video {
 
     @OneToMany(mappedBy = "video")
     private List<Favoris> favoris;
+    
+    
+    @ManyToOne
+    @JoinColumn(name="mentor_id")
+    private Utilisateur utilisateur;
 }
