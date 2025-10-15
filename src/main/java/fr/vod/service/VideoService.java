@@ -39,7 +39,6 @@ public class VideoService {
 		video.setDescription(dto.getDescription());
 		video.setDuration(dto.getDuration());
 		video.setAuthor(dto.getAuthor());
-		video.setPublisher(dto.getPublisher());
 		video.setService(serviceRepo.findById(dto.getServiceId()).orElseThrow());
 		video.setUtilisateur(mentor);
 		return videoRepo.save(video);

@@ -12,6 +12,6 @@ public class VideoDTO {
 	private String description;
 	private int duration;
 	private String author;
-	private String publisher;
+	private Boolean isActive = true;
 	private Long serviceId;
 }

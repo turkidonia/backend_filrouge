@@ -26,7 +26,6 @@ public class ServiceService {
                                 dto.setDescription(video.getDescription());
                                 dto.setDuration(video.getDuration());
                                 dto.setAuthor(video.getAuthor());
-                                dto.setPublisher(video.getPublisher());
                                 dto.setServiceId(service.getId());
                                 return dto;
                             })
