@@ -1,10 +1,8 @@
 package fr.vod.model;
 
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Getter
@@ -31,15 +29,15 @@ public class Utilisateur {
     private boolean mentored;
     private String username;
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Commentaire> commentaires;
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Like> likes;
 
-    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Favoris> favoris;
 }

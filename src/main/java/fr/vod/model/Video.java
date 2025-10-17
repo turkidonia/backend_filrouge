@@ -1,8 +1,9 @@
 package fr.vod.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.util.List;
 
 @Getter
@@ -11,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @ToString
 @Entity
-@Table
+@Table(name = "video")
 public class Video {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,23 +22,28 @@ public class Video {
     private String url;
     private String description;
     private int duration;
-    private String author;
     private Boolean isActive = true;
 
+    // Relation vers Service
     @ManyToOne
+    @JoinColumn(name = "service_id")
     private Service service;
 
-    @OneToMany(mappedBy = "video")
+    // Relation vers Commentaire
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Commentaire> commentaires;
 
-    @OneToMany(mappedBy = "video")
+    // Relation vers Like
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Like> likesList;
 
-    @OneToMany(mappedBy = "video")
+    // Relation vers Favoris
+    @OneToMany(mappedBy = "video", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Favoris> favoris;
-    
-    
+
+    // Mentor (l'utilisateur qui a posté la vidéo)
     @ManyToOne
-    @JoinColumn(name="mentor_id")
+    @JoinColumn(name = "mentor_id")
+    @JsonIgnore // <-- empêche la boucle infinie lors de la sérialisation JSON
     private Utilisateur utilisateur;
 }

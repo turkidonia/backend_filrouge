@@ -18,6 +18,6 @@ public class Service {
 
     private String name;
 
-    @OneToMany
+    @OneToMany(mappedBy = "service", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Video> videos;
 }

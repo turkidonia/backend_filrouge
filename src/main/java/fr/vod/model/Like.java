@@ -12,17 +12,27 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "video_likes")
 public class Like {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    @EmbeddedId
+    private LikeId id;
 
     private LocalDateTime publishDate;
 
+    @MapsId("utilisateurId")
     @ManyToOne
     @JoinColumn(name = "utilisateur_id")
     private Utilisateur utilisateur;
 
+    @MapsId("videoId")
     @ManyToOne
     @JoinColumn(name = "video_id")
     private Video video;
+
+    // constructeur pratique
+    public Like(Utilisateur utilisateur, Video video, LocalDateTime publishDate) {
+        this.utilisateur = utilisateur;
+        this.video = video;
+        this.publishDate = publishDate;
+        this.id = new LikeId(utilisateur.getId(), video.getId());
+    }
 }
