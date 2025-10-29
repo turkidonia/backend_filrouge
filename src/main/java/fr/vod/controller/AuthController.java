@@ -43,6 +43,20 @@ public class AuthController {
 
     @Autowired
     private CustomUserDetailsService userDetailsService;
+    
+    // Setters pour les tests
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        this.authenticationManager = authenticationManager;
+    }
+    public void setJwtTokenUtil(JwtTokenUtil jwtTokenUtil) {
+        this.jwtTokenUtil = jwtTokenUtil;
+    }
+    public void setUserService(UserService userService) {
+        this.userService = userService;
+    }
+    public void setUserDetailsService(CustomUserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody AuthenticationForm loginRequest) {

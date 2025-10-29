@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class VideoDTO {
 
+	private Long id;
     private String title;
     private String url;
     private String description;
@@ -18,6 +19,7 @@ public class VideoDTO {
     // Conversion entité -> DTO
     public static VideoDTO fromEntity(Video video) {
         VideoDTO dto = new VideoDTO();
+        dto.setId(video.getId()); // ✅ Très important !
         dto.setTitle(video.getTitle());
         dto.setUrl(video.getUrl());
         dto.setDescription(video.getDescription());
