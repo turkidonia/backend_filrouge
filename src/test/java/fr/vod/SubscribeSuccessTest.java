@@ -48,11 +48,11 @@ class SubscribeSuccessTest {
         form.setEmail("newuser@example.com");
         form.setPassword("password");
         form.setUsername("newuser");
-        form.setLastName("Doe");
-        form.setFirstName("John");
+        form.setName("Doe");
+        form.setSurname("John");
         form.setGender('H');
         form.setPhone("0600000000");
-        form.setIsMentored(true);
+        form.setMentored(true);
 
         Mockito.when(userService.exists("newuser@example.com")).thenReturn(false);
 

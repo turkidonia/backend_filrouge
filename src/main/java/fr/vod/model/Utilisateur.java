@@ -26,7 +26,9 @@ public class Utilisateur {
     private String phone;
     private Character gender;
     private boolean isAdmin;
-    private boolean mentored;
+    @Column(name = "is_mentored") 
+    private boolean mentored = true;
+
     private String username;
 
     @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)

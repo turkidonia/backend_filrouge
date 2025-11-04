@@ -16,7 +16,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig {
 
 	@Value("${app.url}")
-	private String allowedOrigin; // contient "http://localhost:3000,https://start-her.netlify.app"
+	private String allowedOrigin; // contient "http://localhost:9091,https://start-her.netlify.app"
 	
     @Bean
     public WebMvcConfigurer corsConfigurer() {

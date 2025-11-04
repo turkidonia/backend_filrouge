@@ -1,5 +1,7 @@
 package fr.vod.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,9 +11,10 @@ public class SubscribeForm {
 	private String email;
 	private String username;
 	private String password;
-	private String lastName;
-	private String firstName;
+	private String name;
+	private String surname;
 	private Character gender;
 	private String phone;
-	private Boolean isMentored;  // <--- ajouté pour mapper le front
+	@JsonProperty("isMentored")
+    private boolean mentored = true;
 }

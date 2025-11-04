@@ -1,5 +1,7 @@
 package fr.vod.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Data;
 
 @Data
@@ -11,6 +13,7 @@ public class UserDTO {
     private String phone;
     private String gender;
     private boolean isAdmin;
-    private boolean mentored;
+    @JsonProperty("isMentored") // Force Jackson à mapper correctement
+    private boolean mentored = true;
     private String username;
 }

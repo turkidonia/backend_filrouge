@@ -84,6 +84,10 @@ public class AuthController {
 
     @PostMapping("/subscribe")
     public ResponseEntity<?> subscribe(@RequestBody SubscribeForm subscribeForm) {
+    	 	System.out.println("=== SUBSCRIBE FORM ===");
+    	    System.out.println("Email: " + subscribeForm.getEmail());
+    	    System.out.println("isMentored from form: " + subscribeForm.isMentored());
+    	    System.out.println("=== END FORM ===");
         if (userService.exists(subscribeForm.getEmail())) {
             throw new UtilisateurExisteDejaException();
         }
@@ -92,11 +96,11 @@ public class AuthController {
                 subscribeForm.getEmail(),
                 subscribeForm.getPassword(),
                 subscribeForm.getUsername(),
-                subscribeForm.getLastName(),
-                subscribeForm.getFirstName(),
+                subscribeForm.getName(),
+                subscribeForm.getSurname(),
                 subscribeForm.getGender(),
                 subscribeForm.getPhone(),
-                subscribeForm.getIsMentored()
+                subscribeForm.isMentored()
         );
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(subscribeForm.getEmail());
